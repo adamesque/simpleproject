@@ -1,7 +1,3 @@
-require 'rake'
-require 'yaml'
-require 'curb'
-
 PROJECT_PATH = File.dirname(__FILE__)
 PUBLIC = File.join(PROJECT_PATH, "public")
 EXPORT = File.join(PROJECT_PATH, "export")
@@ -18,20 +14,26 @@ end
 
 desc "Export dynamic files as static"
 task :export do
-  FileUtils.mkdir_p EXPORT
-  manifest = YAML.load_file("export.yml")
+  begin
+    require 'curb'
   
-  manifest["files"].each do |filename|
-    output = File.join(EXPORT, filename)
-    FileUtils.mkdir_p base_path(output)
+    FileUtils.mkdir_p EXPORT
+    manifest = YAML.load_file("export.yml")
+  
+    manifest["files"].each do |filename|
+      output = File.join(EXPORT, filename)
+      FileUtils.mkdir_p base_path(output)
     
-    c = Curl::Easy.perform("http://localhost:4567/" + filename)
-    File.open(output, "w") do |f|  
-      f.write c.body_str
+      c = Curl::Easy.perform("http://localhost:4567/" + filename)
+      File.open(output, "w") do |f|  
+        f.write c.body_str
+      end
     end
-  end
   
-  copy_files([ "**/**" ], PUBLIC, EXPORT)
+    copy_files([ "**/**" ], PUBLIC, EXPORT)
+  rescue LoadError
+    puts "Curb not available. Please run 'rake setup' first."
+  end  
 end
 
 ### Utility Functions

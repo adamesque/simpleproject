@@ -2,6 +2,8 @@ PROJECT_PATH = File.dirname(__FILE__)
 PUBLIC = File.join(PROJECT_PATH, "public")
 EXPORT = File.join(PROJECT_PATH, "export")
 
+task :default => :setup
+
 desc "Set up the project before running the server"
 task :setup => [:install_dependencies] do
   p %(Run "ruby server.rb" to start the server at localhost:4567)
